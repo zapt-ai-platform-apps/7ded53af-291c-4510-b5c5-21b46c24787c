@@ -1,17 +1,9 @@
-# مساعد القراءة للطلاب
+# AI Reading Tutor (بصير)
 
-تطبيق ويب تفاعلي لمساعدة الطلاب على تعلم القراءة باللغة العربية من خلال محادثة مع روبوت دردشة ذكي.
+An intelligent electronic chat bot designed to help students learn to read. Interact with بصير by typing messages and receive helpful responses to improve your reading skills.
 
-## الرحلات الأساسية للمستخدم
+## User Journeys
 
-1. [بدء المحادثة](docs/journeys/start-chat.md) - البدء بمحادثة جديدة مع الروبوت
-2. [إرسال رسالة](docs/journeys/send-message.md) - كتابة وإرسال رسالة إلى الروبوت
-3. [استلام الرد](docs/journeys/receive-response.md) - استلام رد من الروبوت التعليمي
-
-## تعليمات البدء
-
-1. افتح التطبيق في متصفح الويب على جهازك.
-2. ابدأ المحادثة مع الروبوت عن طريق كتابة رسالتك في مربع الإدخال.
-3. اضغط على زر "إرسال" لبدء التفاعل مع الروبوت.
-
-تعرف على المزيد عن [زابت](https://www.zapt.ai).
+1. [Sign In & Sign Up](docs/journeys/sign-in-sign-up.md) - Access the app using your account
+2. [Start a Conversation](docs/journeys/start-conversation.md) - Begin chatting with the AI tutor
+3. [Listen to Responses](docs/journeys/listen-to-responses.md) - Hear the AI's responses via text-to-speech

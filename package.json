@@ -1,7 +1,7 @@
 {
   "name": "solidjs-vite-tailwind-vercel",
   "version": "1.0.0",
-  "description": "SolidJS app with Vite, Tailwind",
+  "description": "An AI Reading Tutor built with SolidJS, Tailwind, and Vite",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,8 +10,11 @@
   },
   "dependencies": {
     "@sentry/browser": "^8.41.0",
+    "solid-js": "^1.8.22",
+    "@supabase/auth-ui-shared": "^0.1.8",
+    "@supabase/auth-ui-solid": "^0.3.8",
     "@zapt/zapt-js": "^1.0.6",
-    "solid-js": "^1.8.22"
+    "solid-markdown": "^2.0.13"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",

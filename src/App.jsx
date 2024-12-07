@@ -1,62 +1,105 @@
-import { createSignal, onMount, createEffect } from 'solid-js';
-import { createEvent } from './supabaseClient';
-import MessageList from './components/MessageList.jsx';
-import MessageInput from './components/MessageInput.jsx';
-import './index.css';
+import { createSignal, onMount, createEffect, Show } from 'solid-js';
+import { supabase } from './supabaseClient';
+import SignIn from './components/SignIn.jsx';
+import Chat from './components/Chat.jsx';
 
-export default function App() {
+function App() {
+  const [user, setUser] = createSignal(null);
+  const [currentPage, setCurrentPage] = createSignal('login');
   const [messages, setMessages] = createSignal([]);
-  const [inputValue, setInputValue] = createSignal('');
+  const [inputMessage, setInputMessage] = createSignal('');
   const [loading, setLoading] = createSignal(false);
+  const [audioUrl, setAudioUrl] = createSignal('');
+
+  const checkUserSignedIn = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setUser(user);
+      setCurrentPage('homePage');
+    }
+  };
+
+  onMount(checkUserSignedIn);
+
+  createEffect(() => {
+    const authListener = supabase.auth.onAuthStateChange((_, session) => {
+      if (session?.user) {
+        setUser(session.user);
+        setCurrentPage('homePage');
+      } else {
+        setUser(null);
+        setCurrentPage('login');
+      }
+    });
+
+    return () => {
+      authListener.data.unsubscribe();
+    };
+  });
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setCurrentPage('login');
+  };
 
   const sendMessage = async () => {
-    if (!inputValue()) return;
-    const userMessage = { sender: 'user', text: inputValue() };
-    setMessages([...messages(), userMessage]);
-    setInputValue('');
+    if (inputMessage().trim() === '') return;
+    const userMessage = inputMessage();
+    const newMessages = [
+      ...messages(),
+      { role: 'user', content: userMessage },
+    ];
+    setMessages(newMessages);
+    setInputMessage('');
     setLoading(true);
 
     try {
-      const response = await createEvent('chatgpt_request', {
-        prompt: `ساعدني في تعلم القراءة باللغة العربية: ${userMessage.text}`,
-        response_type: 'text'
+      const result = await createEvent('chatgpt_request', {
+        prompt: `You are an AI tutor helping students learn to read. Respond to the user in simple language appropriate for students learning to read. The user's message is: "${userMessage}"`,
+        response_type: 'text',
       });
-      const botMessage = { sender: 'bot', text: response };
-      setMessages((prev) => [...prev, botMessage]);
+      setMessages([
+        ...newMessages,
+        { role: 'assistant', content: result },
+      ]);
+
+      // Uncomment the following lines to enable text-to-speech for the AI response
+      /*
+      const audioResult = await createEvent('text_to_speech', {
+        text: result,
+      });
+      setAudioUrl(audioResult);
+      */
     } catch (error) {
-      console.error('Error:', error);
-      const errorMessage = { sender: 'bot', text: 'حدث خطأ، يرجى المحاولة مرة أخرى.' };
-      setMessages((prev) => [...prev, errorMessage]);
+      console.error('Error fetching AI response:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  };
-
   return (
-    <div class="min-h-screen bg-gradient-to-br from-blue-100 to-green-100 p-4">
-      <div class="max-w-2xl mx-auto flex flex-col h-full">
-        <h1 class="text-3xl font-bold text-center mb-4 text-gray-800">مساعد القراءة للطلاب</h1>
-        <MessageList messages={messages} loading={loading} />
-        <MessageInput
-          inputValue={inputValue}
-          setInputValue={setInputValue}
+    <div class="h-full bg-gradient-to-br from-purple-100 to-blue-100 p-4">
+      <Show
+        when={currentPage() === 'homePage'}
+        fallback={
+          <SignIn />
+        }
+      >
+        <Chat
+          user={user}
+          handleSignOut={handleSignOut}
+          messages={messages}
+          setMessages={setMessages}
+          inputMessage={inputMessage}
+          setInputMessage={setInputMessage}
           sendMessage={sendMessage}
-          handleKeyPress={handleKeyPress}
           loading={loading}
+          audioUrl={audioUrl}
         />
-        <div class="mt-4 text-center">
-          <a href="https://www.zapt.ai" target="_blank" rel="noopener noreferrer" class="text-gray-600 hover:underline">
-            صنع بواسطة زابت
-          </a>
-        </div>
-      </div>
+      </Show>
     </div>
   );
 }
+
+export default App;
